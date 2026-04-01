@@ -1,0 +1,7 @@
+qiskit>=1.0,<2.0
+qiskit-aer>=0.14
+qiskit-ibm-runtime>=0.20
+scipy>=1.10
+numpy>=1.24
+numba>=0.58
+matplotlib>=3.7

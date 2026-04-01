@@ -1,84 +1,54 @@
-# -*- coding: utf-8 -*-
 """
-Created on Sun Jul 31 12:01:05 2022
+Plot learning curves from saved .npy data.
 
-@author: bartkiewicz
+Paper: "Synergic quantum generative machine learning" (arXiv:2112.13255v2)
 """
-
-"""===========================================================================
-A program that draws graphs for a given number of qubits from imported data,
-for the paper: Synergic quantum generative machine learning (arXiv:2112.13255)
-=============================================================================="""
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-Old = True
-New = True
-seed = 103
-
-mono_font = {'fontname':'monospace'}
-serif_font = {'fontname':'serif'}
+SEED = 103
+N_QUBITS = 5
 
 plt.rcParams['text.usetex'] = True
+serif_font = {'fontname': 'serif'}
+cm = 1 / 2.54
 
-# Create plot
-cm = 1/2.54  # centimeters in inches
+for n in [N_QUBITS]:
+    base_new = f"_iter_new_seed{SEED}_n_{n}disc1ALT.npy"
+    base_old = f"_iter_old_seed{SEED}_n_{n}disc1ALT.npy"
 
-for n in [5]:
+    cases = {"SQGEN": base_new, "QGAN": base_old}
 
-    baseNew = "_iter_new_seed" + str(seed) + "_n_"+ str(n) +"disc1ALT.npy"        
-    baseOld = "_iter_old_seed" + str(seed) + "_n_"+ str(n) +"disc1ALT.npy"        
-    
-    cases = {"SQGEN":baseNew, "QGAN":baseOld}
-    
-    for alg in cases.keys():
-        
-        
-        base = cases[alg]
-        y1 = np.load("prt"+base)
-        y2 = np.load("pft"+base)
-        y3 = np.load("fid"+base)
-        
-        
+    for alg, base in cases.items():
+        y1 = np.load("prt" + base)
+        y2 = np.load("pft" + base)
+        y3 = np.load("fid" + base)
+
         if alg == "QGAN":
-            y1 = np.array([y1[m] for m in range(len(y3.tolist())) ])
-            y2 = np.array([y2[m] for m in range(len(y3.tolist())) ])
-        
-        fig = plt.figure(figsize=(8.5*cm, 6*cm))
-        ax = fig.add_subplot(1, 1, 1)
+            y1 = y1[:len(y3)]
+            y2 = y2[:len(y3)]
 
+        fig, ax = plt.subplots(figsize=(8.5 * cm, 6 * cm))
 
-        
-        plt.plot(y1,'g',label=r"$1-p$",marker=">")
-        plt.plot(y2,'r',label=r"$1-q$",marker="<")
-        plt.plot(y3,'b',label=r"$F$",marker="^")
-        
-        tit = (r"$\mathrm{"+alg+ r"}:\quad n=" + str(n) + ",\quad \mathrm{seed}=" 
-                 + str(seed) + r"$")
-        
-        plt.title(tit)
-        plt.legend()
-        plt.legend(loc='center right')
-        
-        plt.ylabel(r'$\mathrm{Learning\; parameters}$',fontsize = 10,**serif_font)
-        plt.xticks(fontsize = 10,**serif_font)
-        plt.yticks(fontsize = 10,**serif_font)
-        
-        plt.ylim(-0.05,1.05)
-        
-        plt.xlabel(r'$\mathrm{Epoch}$',fontsize = 10,**serif_font)
-        plt.xticks(np.linspace(0,20,11))
-        plt.yticks(np.linspace(0,1,5))
-        plt.grid(True)
-        plt.ylabel(r'$\mathrm{Learning\; parameters}$',fontsize = 10,**serif_font)
-        plt.xticks(fontsize = 10,**serif_font)
-        plt.yticks(fontsize = 10,**serif_font)
-        
-        plt.tight_layout()
-        
-        plt.savefig("fig6_" + alg + "GHZ" + str(n) + "ALT.svg")
-        plt.savefig("fig6_" + alg + "GHZ" + str(n) + "ALT.pdf")
-        
+        ax.plot(y1, 'g', label=r"$1-p$", marker=">")
+        ax.plot(y2, 'r', label=r"$1-q$", marker="<")
+        ax.plot(y3, 'b', label=r"$F$", marker="^")
+
+        tit = (r"$\mathrm{" + alg + r"}:\quad n=" + str(n)
+               + r",\quad \mathrm{seed}=" + str(SEED) + r"$")
+        ax.set_title(tit)
+        ax.legend(loc='center right')
+
+        ax.set_ylabel(r'$\mathrm{Learning\; parameters}$', fontsize=10, **serif_font)
+        ax.set_xlabel(r'$\mathrm{Epoch}$', fontsize=10, **serif_font)
+        ax.set_xticks(np.linspace(0, 20, 11))
+        ax.set_yticks(np.linspace(0, 1, 5))
+        ax.set_ylim(-0.05, 1.05)
+        ax.tick_params(labelsize=10)
+        ax.grid(True)
+
+        fig.tight_layout()
+        fig.savefig(f"fig6_{alg}GHZ{n}ALT.svg")
+        fig.savefig(f"fig6_{alg}GHZ{n}ALT.pdf")
         plt.show()
-        
